@@ -1,28 +1,42 @@
 # Use the Playwright image that matches your Playwright version
-# This image ALREADY contains all fonts and FFMPEG dependencies
-FROM mcr.microsoft.com/playwright:v1.40.0-jammy
+# Base image with Python
+FROM python:3.11-slim
 
-# 1. Update and install Python 3
-RUN apt-get update && \
-    apt-get install -y python3 python3-pip && \
-    rm -rf /var/lib/apt/lists/*
-
-# 2. Set the working directory
+# Set working directory
 WORKDIR /app
 
-# 3. Copy only requirements first (to leverage Docker caching)
-COPY requirements.txt .
-
-# 4. Install Python dependencies
-RUN pip3 install --no-cache-dir -r requirements.txt
-
-# 5. Copy the rest of your application code
+# Copy project files
 COPY . .
 
-# 6. Set Environment Variables
-# Render uses port 10000 by default for web services
-ENV PORT=10000
+# Install system dependencies for Playwright
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    libnss3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libpangocairo-1.0-0 \
+    libxshmfence1 \
+    libglib2.0-0 \
+    libpango-1.0-0 \
+    libgtk-3-0 \
+    && rm -rf /var/lib/apt/lists/*
 
-# 7. Start your application
-# Replace 'app:app' with your actual filename and variable (e.g., main:app)
-CMD ["python3", "-m", "gunicorn", "-b", "0.0.0.0:10000", "main:app"]
+# Install Python dependencies
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# Install Playwright browsers
+RUN playwright install chromium
+
+# Expose port Render uses
+EXPOSE 10000
+
+# Start command
+CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:$PORT", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker"]

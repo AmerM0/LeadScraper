@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MAX_RESULTS=20
+      - TIMEOUT_SECONDS=15
+      - HEADLESS=true
+    volumes:
+      - ./data:/app/data
+      - ./leads.db:/app/leads.db
+    restart: unless-stopped

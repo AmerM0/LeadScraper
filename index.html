@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Generation Tool - Powered by Playwright</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .leads-container {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .lead-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s;
+        }
+        
+        .lead-card:hover {
+            transform: translateX(5px);
+        }
+        
+        .lead-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .lead-detail {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            color: #555;
+        }
+        
+        .lead-detail strong {
+            min-width: 80px;
+            color: #667eea;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .link {
+            color: #667eea;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Lead Generation Tool</h1>
+            <p class="subtitle">Production-ready scraping powered by Playwright</p>
+        </header>
+        
+        <div class="main-grid">
+            <!-- Left Sidebar: Search Form & Stats -->
+            <div>
+                <div class="card">
+                    <h2 style="margin-bottom: 20px; color: #333;">Find Leads</h2>
+                    
+                    <form id="scrapeForm">
+                        <div class="form-group">
+                            <label for="niche">Business Niche</label>
+                            <input type="text" id="niche" placeholder="e.g., plumbers, coffee shops" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" placeholder="e.g., Munich, Berlin" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="maxResults">Max Results</label>
+                            <select id="maxResults">
+                                <option value="10">10 leads</option>
+                                <option value="20" selected>20 leads</option>
+                                <option value="30">30 leads</option>
+                                <option value="50">50 leads</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" id="scrapeBtn">
+                            🚀 Start Scraping
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="card" style="margin-top: 20px;">
+                    <h3 style="margin-bottom: 15px; color: #333;">Statistics</h3>
+                    <div class="stats">
+                        <div class="stat-box">
+                            <div class="stat-number" id="totalLeads">0</div>
+                            <div class="stat-label">Total Leads</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number" id="withEmails">0</div>
+                            <div class="stat-label">With Emails</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Side: Results -->
+            <div class="card">
+                <h2 style="margin-bottom: 20px; color: #333;">Results</h2>
+                
+                <div id="alertContainer"></div>
+                
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Scraping leads... This may take 1-2 minutes</p>
+                </div>
+                
+                <div id="resultsContainer">
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <h3>No leads yet</h3>
+                        <p>Enter a niche and location to start scraping</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = window.location.origin;
+        
+        // Load stats on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+        });
+        
+        // Form submission
+        document.getElementById('scrapeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const niche = document.getElementById('niche').value;
+            const location = document.getElementById('location').value;
+            const maxResults = parseInt(document.getElementById('maxResults').value);
+            
+            await scrapeLeads(niche, location, maxResults);
+        });
+        
+        async function scrapeLeads(niche, location, maxResults) {
+            const scrapeBtn = document.getElementById('scrapeBtn');
+            const loading = document.getElementById('loading');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const alertContainer = document.getElementById('alertContainer');
+            
+            // Show loading
+            scrapeBtn.disabled = true;
+            scrapeBtn.textContent = '⏳ Scraping...';
+            loading.classList.add('active');
+            resultsContainer.innerHTML = '';
+            alertContainer.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/scrape`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ niche, location, max_results: maxResults })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Scraping failed');
+                }
+                
+                // Show success message
+                alertContainer.innerHTML = `
+                    <div class="alert alert-success">
+                        ✓ Successfully scraped ${data.leads_found} leads!
+                    </div>
+                `;
+                
+                // Display leads
+                displayLeads(data.leads);
+                
+                // Refresh stats
+                await loadStats();
+                
+            } catch (error) {
+                console.error('Scrape error:', error);
+                alertContainer.innerHTML = `
+                    <div class="alert alert-error">
+                        ✗ Error: ${error.message}
+                    </div>
+                `;
+                resultsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Scraping failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                loading.classList.remove('active');
+                scrapeBtn.disabled = false;
+                scrapeBtn.textContent = '🚀 Start Scraping';
+            }
+        }
+        
+        function displayLeads(leads) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            
+            if (!leads || leads.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No leads found</h3>
+                        <p>Try different search terms</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            resultsContainer.innerHTML = `
+                <div class="leads-container">
+                    ${leads.map(lead => `
+                        <div class="lead-card">
+                            <div class="lead-name">
+                                ${lead.business_name}
+                                ${lead.emails.length > 0 ? '<span class="badge badge-success">Has Email</span>' : ''}
+                                ${lead.phones.length > 0 ? '<span class="badge badge-info">Has Phone</span>' : ''}
+                            </div>
+                            
+                            <div class="lead-detail">
+                                <strong>Website:</strong>
+                                <a href="${lead.website}" target="_blank" class="link">${lead.website}</a>
+                            </div>
+                            
+                            ${lead.emails.length > 0 ? `
+                                <div class="lead-detail">
+                                    <strong>Email:</strong>
+                                    <span>${lead.emails.join(', ')}</span>
+                                </div>
+                            ` : ''}
+                            
+                            ${lead.phones.length > 0 ? `
+                                <div class="lead-detail">
+                                    <strong>Phone:</strong>
+                                    <span>${lead.phones.join(', ')}</span>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="lead-detail">
+                                <strong>Source:</strong>
+                                <span>${lead.source_page}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/stats`);
+                const data = await response.json();
+                
+                document.getElementById('totalLeads').textContent = data.total_leads || 0;
+                document.getElementById('withEmails').textContent = data.leads_with_emails || 0;
+            } catch (error) {
+                console.error('Stats load error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

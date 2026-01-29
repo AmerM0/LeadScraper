@@ -39,4 +39,4 @@ RUN playwright install chromium
 EXPOSE 10000
 
 # Start command
-CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:$PORT", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker"]
+CMD gunicorn main:app --bind 0.0.0.0:$PORT --workers 1 --worker-class uvicorn.workers.UvicornWorker
